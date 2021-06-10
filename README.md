@@ -1,2 +1,2 @@
 # SVG
-Make SVG file with python
+Make SVG files with python
