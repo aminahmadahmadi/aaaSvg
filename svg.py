@@ -1,4 +1,7 @@
-﻿class Svg:
+﻿from typing import MutableMapping
+
+
+class Svg:
     count = 0
 
     def __init__(self, name, w, h):
@@ -26,6 +29,13 @@
 
         return _attrs
 
+    def managePoints(points):
+        _points = ''
+        for point in points:
+            _points += f'{point[0]},{point[1]} '
+
+        return _points
+
     def addCircle(self, cx, cy, r, **attrs):
         circleStr = f'<circle cx="{cx}" cy="{cy}" r="{r}" {Svg.manageAttrs(attrs)}/>'
         self.addObjectText(circleStr)
@@ -39,8 +49,16 @@
         self.addObjectText(ellipseStr)
 
     def addLine(self, x1, y1, x2, y2, **attrs):
-        lineStr = f'<rect x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" {Svg.manageAttrs(attrs)}/>'
+        lineStr = f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" {Svg.manageAttrs(attrs)}/>'
         self.addObjectText(lineStr)
+
+    def addPolygon(self, points, **attrs):
+        polygonStr = f'<polygon points="{Svg.managePoints(points)}" {Svg.manageAttrs(attrs)}/>'
+        self.addObjectText(polygonStr)
+
+    def addPolyline(self, points, **attrs):
+        polylineStr = f'<polyline points="{Svg.managePoints(points)}" {Svg.manageAttrs(attrs)}/>'
+        self.addObjectText(polylineStr)
 
 
 # Test Code ----------------------------------------
