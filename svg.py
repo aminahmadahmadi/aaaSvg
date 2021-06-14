@@ -14,10 +14,15 @@ class Svg:
 
     def addStyle(self, className, css):
         self.styles.append(f'.{className} {{{css}}}')
-        print(self.styles[-1])
 
     def addObjectText(self, objText):
         self.objects.append(objText)
+
+    def openGroup(self):
+        self.addObjectText('<g>')
+
+    def closeGroup(self):
+        self.addObjectText('</g>')
 
     def save(self, direction):
         self.svg = [
@@ -25,9 +30,7 @@ class Svg:
             '<style type="text/css" >',
             '\n'.join(self.styles),
             '</style>',
-            '<g>',
             '\n'.join(self.objects),
-            '</g>',
             '</svg>',
         ]
         svgFile = open(direction+'\\'+self.name + '.svg', "w")
@@ -41,14 +44,12 @@ class Svg:
                 _attrs += f'class="{attrs[key]}" '
             else:
                 _attrs += f'{key}="{attrs[key]}" '
-
         return _attrs
 
     def managePoints(points):
         _points = ''
         for point in points:
             _points += f'{point[0]},{point[1]} '
-
         return _points
 
     def addCircle(self, cx, cy, r, **attrs):
@@ -82,8 +83,6 @@ class Svg:
                 cy - ry * sin(radians(endDegree)))
         sweepFlag = 0 if endDegree > startDegree else 1
         largeArcFlag = 0 if endDegree - startDegree < 180 else 1
-        print(startDegree, ' --> ', endDegree, ' | ', endDegree > startDegree,
-              sweepFlag, endDegree-startDegree > 180, largeArcFlag)
         arcStr = f'<path d="M {_start[0]},{_start[1]} A {rx},{ry} 0 {largeArcFlag} {sweepFlag} {_end[0]},{_end[1]}" {Svg.manageAttrs(attrs)}/>'
         self.addObjectText(arcStr)
 
@@ -93,4 +92,4 @@ myfile = Svg('myfile', 500, 500)
 myfile.addStyle('st1', 'stroke: #f00; fill: none;')
 myfile.addCircle(250, 250, 200, class_='st1')
 myfile.addNormalArc(250, 250, 190, 190, 30, 150, class_='st1')
-myfile.save('C:\\Users\\Amin\\Desktop\\svg')
+myfile.save('F:\\svg')
