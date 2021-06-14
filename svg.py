@@ -27,10 +27,7 @@
         return _attrs
 
     def addCircle(self, cx, cy, r, **attrs):
-        print(attrs)
         circleStr = f'<circle cx="{cx}" cy="{cy}" r="{r}" {Svg.manageAttrs(attrs)}/>'
-
-        print(circleStr)
         self.addObjectText(circleStr)
 
 
