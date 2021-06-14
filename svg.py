@@ -1,4 +1,4 @@
-﻿from typing import MutableMapping
+﻿from math import sin, cos, radians
 
 
 class Svg:
@@ -18,6 +18,21 @@ class Svg:
 
     def addObjectText(self, objText):
         self.objects.append(objText)
+
+    def save(self, direction):
+        self.svg = [
+            f'<svg width="{self.width}" height="{self.height}" version="1.1" xmlns="http://www.w3.org/2000/svg">',
+            '<style type="text/css" >',
+            '\n'.join(self.styles),
+            '</style>',
+            '<g>',
+            '\n'.join(self.objects),
+            '</g>',
+            '</svg>',
+        ]
+        svgFile = open(direction+'\\'+self.name + '.svg', "w")
+        svgFile.write('\n'.join(self.svg))
+        svgFile.close()
 
     def manageAttrs(attrs):
         _attrs = ''
@@ -60,8 +75,22 @@ class Svg:
         polylineStr = f'<polyline points="{Svg.managePoints(points)}" {Svg.manageAttrs(attrs)}/>'
         self.addObjectText(polylineStr)
 
+    def addNormalArc(self, cx, cy, rx, ry, startDegree, endDegree, **attrs):
+        _start = (cx + rx * cos(radians(startDegree)),
+                  cy - ry * sin(radians(startDegree)))
+        _end = (cx + rx * cos(radians(endDegree)),
+                cy - ry * sin(radians(endDegree)))
+        sweepFlag = 0 if endDegree > startDegree else 1
+        largeArcFlag = 0 if endDegree - startDegree < 180 else 1
+        print(startDegree, ' --> ', endDegree, ' | ', endDegree > startDegree,
+              sweepFlag, endDegree-startDegree > 180, largeArcFlag)
+        arcStr = f'<path d="M {_start[0]},{_start[1]} A {rx},{ry} 0 {largeArcFlag} {sweepFlag} {_end[0]},{_end[1]}" {Svg.manageAttrs(attrs)}/>'
+        self.addObjectText(arcStr)
+
 
 # Test Code ----------------------------------------
-myfile = Svg('myfile', 100, 100)
-myfile.addStyle('st1', 'stroke: #f00; fill: #00f;')
-myfile.addCircle(50, 50, 20, class_='st1', id='salam', fill='none')
+myfile = Svg('myfile', 500, 500)
+myfile.addStyle('st1', 'stroke: #f00; fill: none;')
+myfile.addCircle(250, 250, 200, class_='st1')
+myfile.addNormalArc(250, 250, 190, 190, 30, 150, class_='st1')
+myfile.save('C:\\Users\\Amin\\Desktop\\svg')
