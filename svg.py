@@ -30,6 +30,18 @@
         circleStr = f'<circle cx="{cx}" cy="{cy}" r="{r}" {Svg.manageAttrs(attrs)}/>'
         self.addObjectText(circleStr)
 
+    def addRect(self, x, y, w, h, **attrs):
+        rectStr = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" {Svg.manageAttrs(attrs)}/>'
+        self.addObjectText(rectStr)
+
+    def addEllipse(self, cx, cy, rx, ry, **attrs):
+        ellipseStr = f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}" {Svg.manageAttrs(attrs)}/>'
+        self.addObjectText(ellipseStr)
+
+    def addLine(self, x1, y1, x2, y2, **attrs):
+        lineStr = f'<rect x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" {Svg.manageAttrs(attrs)}/>'
+        self.addObjectText(lineStr)
+
 
 # Test Code ----------------------------------------
 myfile = Svg('myfile', 100, 100)
