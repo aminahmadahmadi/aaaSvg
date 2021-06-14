@@ -19,7 +19,7 @@
     def manageAttrs(attrs):
         _attrs = ''
         for key in attrs.keys():
-            if key == 'style':
+            if key == 'class_':
                 _attrs += f'class="{attrs[key]}" '
             else:
                 _attrs += f'{key}="{attrs[key]}" '
@@ -36,5 +36,5 @@
 
 # Test Code ----------------------------------------
 myfile = Svg('myfile', 100, 100)
-myfile.addStyle('style', 'stroke: #00f; fill: #00f;')
-myfile.addCircle(50, 50, 20, style='style', id='salam', fill='none')
+myfile.addStyle('st1', 'stroke: #f00; fill: #00f;')
+myfile.addCircle(50, 50, 20, class_='st1', id='salam', fill='none')
