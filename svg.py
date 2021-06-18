@@ -86,10 +86,59 @@ class Svg:
         arcStr = f'<path d="M {_start[0]},{_start[1]} A {rx},{ry} 0 {largeArcFlag} {sweepFlag} {_end[0]},{_end[1]}" {Svg.manageAttrs(attrs)}/>'
         self.addObjectText(arcStr)
 
+    def addArc(self, x1, y1, rx, ry, xAxisRotation, largeArcFlag, sweepFlag, x2, y2, **attrs):
+        arcStr = f'<path d="M {x1},{y1} A {rx},{ry} {xAxisRotation} {largeArcFlag} {sweepFlag} {x2},{y2}" {Svg.manageAttrs(attrs)}/>'
+        self.addObjectText(arcStr)
 
-# Test Code ----------------------------------------
-myfile = Svg('myfile', 500, 500)
-myfile.addStyle('st1', 'stroke: #f00; fill: none;')
-myfile.addCircle(250, 250, 200, class_='st1')
-myfile.addNormalArc(250, 250, 190, 190, 30, 150, class_='st1')
-myfile.save('F:\\svg')
+    def addBezier(self, points, *data, **attrs):
+        bezierStr = '<path d="'
+        if data[0] == 'q':
+            if data[1] == 'smooth':  # quadric smooth
+                for i in range(len(points)):
+                    if i == 0:
+                        bezierStr += f'M {points[i][0]},{points[i][1]}'
+                    elif i == 1:
+                        bezierStr += f' Q {points[i][0]},{points[i][1]}'
+                    elif i == 2:
+                        bezierStr += f' {points[i][0]},{points[i][1]}'
+                    else:
+                        bezierStr += f' T {points[i][0]},{points[i][1]}'
+
+            else:  # quadric normal
+                for i in range(len(points)):
+                    if i == 0:
+                        bezierStr += f'M {points[i][0]},{points[i][1]}'
+                    elif i % 2 == 1:
+                        bezierStr += f' Q {points[i][0]},{points[i][1]}'
+                    else:
+                        bezierStr += f' {points[i][0]},{points[i][1]}'
+
+        else:
+            if data[1] == 'smooth':  # cubic smooth
+                for i in range(len(points)):
+                    if i == 0:
+                        bezierStr += f'M {points[i][0]},{points[i][1]}'
+                    elif i == 1:
+                        bezierStr += f' C {points[i][0]},{points[i][1]}'
+                    elif i == 2:
+                        bezierStr += f' {points[i][0]},{points[i][1]}'
+                    elif i == 3:
+                        bezierStr += f' {points[i][0]},{points[i][1]}'
+                    elif i % 2 == 0:
+                        bezierStr += f' S {points[i][0]},{points[i][1]}'
+                    else:
+                        bezierStr += f' {points[i][0]},{points[i][1]}'
+
+            else:  # cubic normal
+                for i in range(len(points)):
+                    if i == 0:
+                        bezierStr += f'M {points[i][0]},{points[i][1]}'
+                    elif i % 3 == 1:
+                        bezierStr += f' C {points[i][0]},{points[i][1]}'
+                    elif i % 3 == 2:
+                        bezierStr += f' {points[i][0]},{points[i][1]}'
+                    else:
+                        bezierStr += f' {points[i][0]},{points[i][1]}'
+
+        bezierStr += f'" {Svg.manageAttrs(attrs)}/>'
+        self.addObjectText(bezierStr)
