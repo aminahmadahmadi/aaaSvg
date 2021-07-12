@@ -23,12 +23,12 @@ for i in range(22):
     points.append((round(math.cos(i)*i*10+250, 5),
                    round(math.sin(i)*i*10+250, 5)))
 
-myfile.addBezier(points, '', '', class_='st1')
-myfile.addBezier(points, 'q', '', class_='st2')
+myfile.addBezier(points,  class_='st1')
+myfile.addBezier(points, 'q', class_='st2')
 myfile.addBezier(points, '', 'smooth', class_='st3')
 myfile.addBezier(points, 'q', 'smooth', class_='st4')
 
 myfile.addPolyline(points, class_='st0')
 # myfile.addCircle(250, 250, 200, class_='st1')
 # myfile.addNormalArc(250, 250, 190, 190, 30, 150, class_='st1')
-myfile.save('F:\\svg')
+myfile.save('D:\\KND\\svg')

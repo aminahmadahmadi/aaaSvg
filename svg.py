@@ -91,6 +91,12 @@ class Svg:
         self.addObjectText(arcStr)
 
     def addBezier(self, points, *data, **attrs):
+
+        if len(data)==0:
+            data = ('','')
+        elif len(data)==1:
+            data = (data[0],'')
+
         bezierStr = '<path d="'
         if data[0] == 'q':
             if data[1] == 'smooth':  # quadric smooth
