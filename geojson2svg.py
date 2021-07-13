@@ -1,5 +1,5 @@
 import geojson
-from pyproj import Proj, transform
+from pyproj import Transformer
 
 with open('D:\\KND\\svg\\N26E053.json') as f:
     gj = geojson.load(f)
@@ -12,6 +12,8 @@ for feature in features:
         print(cordinate)
         _lat = cordinate[1]
         _lon = cordinate[0]
-        print(transform(Proj(init='epsg:4326'), Proj(init='epsg:3857'),  _lon, _lat))  # longitude first, latitude second.
+        transformer = Transformer.from_crs("epsg:4326", "epsg:3857")
+        x,y = transformer.transform( _lon, _lat)
+        print(x,y)
     
     print('---------------------------------------')
