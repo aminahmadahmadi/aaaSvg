@@ -156,13 +156,14 @@ class Svg:
                     else:
                         bezierStr += f' {points[i][0]},{points[i][1]}'
 
+        bezierStr += f'" {Svg.manageAttrs(attrs)}/>'
         self.addObjectText(bezierStr)
 
     def addCurve(self, points, **attrs):
         if (len(points) < 2):
             return
 
-        scl = 0.35
+        scl = 0.25
         if 'scl' in attrs.keys():
             scl = attrs['scl']
         controlPoints = []
@@ -206,8 +207,8 @@ class Svg:
 
     def addCloseCurve(self, points, **attrs):
         if points[0] == points[-1]:
-            points = points[-2] + points + points[1]
+            points = [points[-2]] + points + [points[1]]
         else:
-            points = points[-1] + points + points[0]
+            points = points[-2:] + points + points[:2]
 
-        self.addCurve(self, points, _attrs=attrs)
+        self.addCurve(points, _attrs=attrs)
