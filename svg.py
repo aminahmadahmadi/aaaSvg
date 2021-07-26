@@ -1,4 +1,5 @@
 ﻿from math import sin, cos, radians
+import numpy as np
 
 
 class Svg:
@@ -38,6 +39,9 @@ class Svg:
         svgFile.close()
 
     def manageAttrs(attrs):
+        if '_attrs' in attrs.keys():
+            attrs = attrs['_attrs']
+
         _attrs = ''
         for key in attrs.keys():
             if key == 'class_':
@@ -92,10 +96,10 @@ class Svg:
 
     def addBezier(self, points, *data, **attrs):
 
-        if len(data)==0:
-            data = ('','')
-        elif len(data)==1:
-            data = (data[0],'')
+        if len(data) == 0:
+            data = ('', '')
+        elif len(data) == 1:
+            data = (data[0], '')
 
         bezierStr = '<path d="'
         if data[0] == 'q':
@@ -148,3 +152,49 @@ class Svg:
 
         bezierStr += f'" {Svg.manageAttrs(attrs)}/>'
         self.addObjectText(bezierStr)
+
+    def addCurve(self, points, **attrs):
+        if (len(points) < 2):
+            return
+
+        scl = 0.35
+        if 'scl' in attrs.keys():
+            scl = attrs['scl']
+        controlPoints = []
+
+        for i in range(len(points)):
+            if (i == 0):  # first
+                p1 = np.array(points[i])
+                p2 = np.array(points[i+1])
+
+                tangent = p2 - p1
+                q1 = p1 + scl * tangent
+
+                controlPoints.append(p1)
+                controlPoints.append(q1)
+
+            elif (i == len(points) - 1):  # last
+                p0 = np.array(points[i-1])
+                p1 = np.array(points[i])
+
+                tangent = (p1 - p0)
+                q0 = p1 - scl * tangent
+
+                controlPoints.append(q0)
+                controlPoints.append(p1)
+
+            else:
+                p0 = np.array(points[i - 1])
+                p1 = np.array(points[i])
+                p2 = np.array(points[i + 1])
+
+                tangent = (p2 - p0)/np.linalg.norm(p2 - p0)
+                q0 = p1 - scl * tangent * np.linalg.norm(p1 - p0)
+                q1 = p1 + scl * tangent * np.linalg.norm(p2 - p1)
+
+                controlPoints.append(q0)
+                controlPoints.append(p1)
+                controlPoints.append(q1)
+
+        controlPoints = controlPoints[3:-3]
+        self.addBezier(controlPoints, _attrs=attrs)
