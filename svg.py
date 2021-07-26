@@ -38,9 +38,16 @@ class Svg:
         svgFile.write('\n'.join(self.svg))
         svgFile.close()
 
+    def clearAttrs(attrs):
+        for _ in range(20):
+            if '_attrs' in attrs.keys():
+                attrs = attrs['_attrs']
+            else:
+                break
+        return attrs
+
     def manageAttrs(attrs):
-        if '_attrs' in attrs.keys():
-            attrs = attrs['_attrs']
+        attrs = Svg.clearAttrs(attrs)
 
         _attrs = ''
         for key in attrs.keys():
@@ -95,7 +102,6 @@ class Svg:
         self.addObjectText(arcStr)
 
     def addBezier(self, points, *data, **attrs):
-
         if len(data) == 0:
             data = ('', '')
         elif len(data) == 1:
@@ -150,7 +156,6 @@ class Svg:
                     else:
                         bezierStr += f' {points[i][0]},{points[i][1]}'
 
-        bezierStr += f'" {Svg.manageAttrs(attrs)}/>'
         self.addObjectText(bezierStr)
 
     def addCurve(self, points, **attrs):
@@ -198,3 +203,11 @@ class Svg:
 
         controlPoints = controlPoints[3:-3]
         self.addBezier(controlPoints, _attrs=attrs)
+
+    def addCloseCurve(self, points, **attrs):
+        if points[0] == points[-1]:
+            points = points[-2] + points + points[1]
+        else:
+            points = points[-1] + points + points[0]
+
+        self.addCurve(self, points, _attrs=attrs)
