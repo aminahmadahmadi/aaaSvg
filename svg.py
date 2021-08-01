@@ -25,6 +25,13 @@ class Svg:
     def closeGroup(self):
         self.addObjectText('</g>')
 
+    def rgb2hex(rgb):
+        r = rgb[0]
+        g = rgb[1]
+        b = rgb[2]
+        hex_ = f'#{r:02x}{g:02x}{b:02x}'
+        return hex_
+
     def save(self, direction):
         self.svg = [
             f'<svg width="{self.width}" height="{self.height}" version="1.1" xmlns="http://www.w3.org/2000/svg">',
@@ -212,3 +219,20 @@ class Svg:
             points = points[-2:] + points + points[:2]
 
         self.addCurve(points, _attrs=attrs)
+
+    def progressbar(name, Min, no, Max, m):
+        Min = int(Min)
+        Max = int(Max)
+        diff = Max-Min
+        scl = m/diff
+
+        if no >= Min and no < Max:
+            bar = f'> {name:>20}:{round((100/m)*scl*(no-Min)):3}%   '
+            for _ in range(round(scl*(no-Min))):
+                bar += '█'
+            for _ in range(round(scl*(Max-no))):
+                bar += '░'
+            bar += f'    {no:6}   {(no%10+1)*"#":11}          '
+            print(bar, end="\r")
+        else:
+            print(f'> {name} Done!{100*" "}')
