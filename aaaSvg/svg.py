@@ -105,6 +105,10 @@ class Svg:
         polylineStr = f'<polyline points="{Svg.managePoints(points)}" {Svg.manageAttrs(attrs)}/>'
         self.addObjectText(polylineStr)
 
+    def addPathByD(self, d, **attrs):
+        arcStr = f'<path d="{d}" {Svg.manageAttrs(attrs)}/>'
+        self.addObjectText(arcStr)
+
     def addNormalArc(self, cx, cy, rx, ry, startDegree, endDegree, **attrs):
         _start = (cx + rx * cos(radians(startDegree)),
                   cy - ry * sin(radians(startDegree)))
