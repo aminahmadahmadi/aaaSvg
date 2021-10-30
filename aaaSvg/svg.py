@@ -32,12 +32,23 @@ class Svg:
         hex_ = f'#{r:02x}{g:02x}{b:02x}'
         return hex_
 
-    def save(self, direction):
+    def save(self, direction, **attrs):
+        saveattrs = {
+            "width": self.width,
+            "height": self.height,
+            "viewBox": f"0 0 {self.width} {self.height}"
+        }
+
+        for key in attrs:
+            saveattrs[key] = attrs[key]
+
+        allStyles = "\n".join(self.styles)
+
         self.svg = [
-            f'<svg width="{self.width}" height="{self.height}" version="1.1" xmlns="http://www.w3.org/2000/svg">',
-            '<style type="text/css" >',
-            '\n'.join(self.styles),
-            '</style>',
+            '<?xml version="1.0" encoding="utf-8"?>',
+            f'<svg {Svg.manageAttrs(saveattrs)} xml:space="preserve" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">',
+            '' if len(
+                self.styles) == 0 else f'<style type="text/css" >\n{allStyles}\n</style>',
             '\n'.join(self.objects),
             '</svg>',
         ]
