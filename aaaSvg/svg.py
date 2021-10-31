@@ -80,6 +80,9 @@ class Svg:
         for point in points:
             _points += f'{point[0]},{point[1]} '
         return _points
+    
+    def addComment(self,comment):
+        self.addObjectText(f'<!-- {comment} -->')
 
     def addCircle(self, cx, cy, r, **attrs):
         circleStr = f'<circle cx="{cx}" cy="{cy}" r="{r}" {Svg.manageAttrs(attrs)}/>'
