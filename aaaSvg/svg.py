@@ -19,8 +19,8 @@ class Svg:
     def addObjectText(self, objText):
         self.objects.append(objText)
 
-    def openGroup(self):
-        self.addObjectText('<g>')
+    def openGroup(self, **attrs):
+        self.addObjectText(f'<g  {Svg.manageAttrs(attrs)}>')
 
     def closeGroup(self):
         self.addObjectText('</g>')
