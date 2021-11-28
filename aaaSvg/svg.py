@@ -52,7 +52,7 @@ class Svg:
             '\n'.join(self.objects),
             '</svg>',
         ]
-        svgFile = open(direction+'\\'+self.name + '.svg', "w")
+        svgFile = open(f'{direction}\\{self.name}.svg', "w")
         svgFile.write('\n'.join(self.svg))
         svgFile.close()
 
@@ -80,9 +80,13 @@ class Svg:
         for point in points:
             _points += f'{point[0]},{point[1]} '
         return _points
-    
-    def addComment(self,comment):
+
+    def addComment(self, comment):
         self.addObjectText(f'<!-- {comment} -->')
+
+    def addText(self, x, y, Text, **attrs):
+        textStr = f'<text x="{x}" y="{y}" {Svg.manageAttrs(attrs)}>{Text}</text>'
+        self.addObjectText(textStr)
 
     def addCircle(self, cx, cy, r, **attrs):
         circleStr = f'<circle cx="{cx}" cy="{cy}" r="{r}" {Svg.manageAttrs(attrs)}/>'
@@ -238,7 +242,7 @@ class Svg:
 
         self.addCurve(points, _attrs=attrs)
 
-    def progressbar(name, Min, no, Max, m):
+    def progressbar(name, Min, no, Max, m=50):
         Min = int(Min)
         Max = int(Max)
         diff = Max-Min
@@ -253,4 +257,4 @@ class Svg:
             bar += f'    {no:6}   {(no%10+1)*"#":11}          '
             print(bar, end="\r")
         else:
-            print(f'> {name} Done!{100*" "}')
+            print(f'> {name} Done!{(m+50)*" "}')
