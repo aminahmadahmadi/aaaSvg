@@ -34,8 +34,8 @@ class Svg:
 
     def text(self, **attrs):
         saveattrs = {
-            "width": self.width,
-            "height": self.height,
+            "width": "100%",
+            "height":  "100%",
             "viewBox": f"0 0 {self.width} {self.height}"
         }
 
