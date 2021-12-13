@@ -32,7 +32,7 @@ class Svg:
         hex_ = f'#{r:02x}{g:02x}{b:02x}'
         return hex_
 
-    def save(self, direction, **attrs):
+    def text(self, **attrs):
         saveattrs = {
             "width": self.width,
             "height": self.height,
@@ -52,9 +52,11 @@ class Svg:
             '\n'.join(self.objects),
             '</svg>',
         ]
-        svgFile = open(f'{direction}\\{self.name}.svg', "w")
-        svgFile.write('\n'.join(self.svg))
-        svgFile.close()
+        return '\n'.join(self.svg)
+
+    def save(self, direction, **attrs):
+        with open(f'{direction}\\{self.name}.svg', "w") as svgFile:
+            svgFile.write(self.text(**attrs))
 
     def clearAttrs(attrs):
         for _ in range(20):
