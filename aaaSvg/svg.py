@@ -10,11 +10,15 @@ class Svg:
         self.width = w
         self.height = h
         self.styles = []
+        self.defs = []
         self.objects = []
         Svg.count += 1
 
     def addStyle(self, className, css):
         self.styles.append(f'.{className} {{{css}}}')
+
+    def addDefs(self, text):
+        self.defs.append(text)
 
     def addObjectText(self, objText):
         self.objects.append(objText)
@@ -41,12 +45,16 @@ class Svg:
             saveattrs[key] = attrs[key]
 
         allStyles = "\n".join(self.styles)
+        allDefs = "\n".join(self.defs)
 
         self.svg = [
             '<?xml version="1.0" encoding="utf-8"?>',
             f'<svg {Svg.manageAttrs(saveattrs)} xml:space="preserve" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">',
+            '<defs>',
             '' if len(
                 self.styles) == 0 else f'<style type="text/css" >\n{allStyles}\n</style>',
+            '' if len(self.styles) == 0 else allDefs,
+            '</defs>',
             '\n'.join(self.objects),
             '</svg>',
         ]
