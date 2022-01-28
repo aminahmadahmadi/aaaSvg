@@ -61,7 +61,7 @@ class Svg:
         return '\n'.join(self.svg)
 
     def save(self, direction, **attrs):
-        with open(f'{direction}\\{self.name}.svg', "w") as svgFile:
+        with open(f'{direction}\\{self.name}.svg', "w", encoding="utf-8") as svgFile:
             svgFile.write(self.text(**attrs))
 
     def clearAttrs(attrs):
