@@ -83,6 +83,14 @@ class Svg:
                 _attrs += f'{key}="{attrs[key]}" '
         return _attrs
 
+    def removeDuplicate(points):
+        newPoints = [points[0]]
+        for i in range(1, len(points)):
+            if newPoints[-1] != points[i]:
+                newPoints.append(points[i])
+
+        return newPoints
+
     def managePoints(points):
         _points = ''
         for point in points:
@@ -113,10 +121,12 @@ class Svg:
         self.addObjectText(lineStr)
 
     def addPolygon(self, points, **attrs):
+        points = Svg.removeDuplicate(points)
         polygonStr = f'<polygon points="{Svg.managePoints(points)}" {Svg.manageAttrs(attrs)}/>'
         self.addObjectText(polygonStr)
 
     def addPolyline(self, points, **attrs):
+        points = Svg.removeDuplicate(points)
         polylineStr = f'<polyline points="{Svg.managePoints(points)}" {Svg.manageAttrs(attrs)}/>'
         self.addObjectText(polylineStr)
 
