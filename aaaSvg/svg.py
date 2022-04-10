@@ -1,5 +1,4 @@
 ﻿from math import sin, cos, radians
-import numpy as np
 
 
 class Svg:
@@ -61,7 +60,7 @@ class Svg:
         return '\n'.join(self.svg)
 
     def save(self, direction, **attrs):
-        with open(f'{direction}\\{self.name}.svg', "w", encoding="utf-8") as svgFile:
+        with open(f'{direction}/{self.name}.svg', "w", encoding="utf-8") as svgFile:
             svgFile.write(self.text(**attrs))
 
     def clearAttrs(attrs):
@@ -207,6 +206,11 @@ class Svg:
         self.addObjectText(bezierStr)
 
     def addCurve(self, points, **attrs):
+        try:
+            import numpy as np
+        except:
+            return None
+
         if (len(points) < 2):
             return
 
