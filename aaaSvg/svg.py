@@ -59,7 +59,7 @@ class Svg:
         ]
         return '\n'.join(self.svg)
 
-    def save(self, direction, **attrs):
+    def save(self, direction='', **attrs):
         name = f'{direction}/{self.name}.svg' if direction != '' else f'{self.name}.svg'
         with open(name, "w", encoding="utf-8") as svgFile:
             svgFile.write(self.text(**attrs))
