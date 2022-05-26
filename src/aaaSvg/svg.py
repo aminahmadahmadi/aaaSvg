@@ -210,6 +210,7 @@ class Svg:
         try:
             import numpy as np
         except:
+            print('\033[93mWARNING:  Numpy is not installed.\033[0m')
             return None
 
         if (len(points) < 2):
