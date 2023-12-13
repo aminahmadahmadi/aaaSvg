@@ -282,3 +282,38 @@ class Svg:
             print(bar, end="\r")
         else:
             print(f'> {name} Done!{(m+50)*" "}')
+
+    def concat(self, other, direction=0):
+        ''' 
+        direction 0 -> horizontal
+        direction 1 -> vertical
+        '''
+        if direction == 0:
+            w, h = self.width+other.width, max(self.height, other.height)
+            otherAttrs = {'transform': f"translate({self.width} 0)"}
+
+        elif direction == 1:
+            w, h = max(self.width, other.width), self.height+other.height
+            otherAttrs = {'transform': f"translate(0 {self.height})"}
+
+        newSvg = Svg(f'concat-{direction} {self.name} and {other.name}', w, h)
+
+        newSvg.styles = self.styles + other.styles
+        newSvg.defs = self.defs + other.defs
+        newSvg.objects = ['<g>']+self.objects + \
+            ['</g>', f'<g  {Svg.manageAttrs(otherAttrs)}>'] + \
+            other.objects+['</g>']
+
+        return newSvg
+
+    def __add__(self, other):
+        w, h = max(self.width, other.width), max(self.height, other.height)
+
+        newSvg = Svg(f'add {self.name} and {other.name}', w, h)
+
+        newSvg.styles = self.styles + other.styles
+        newSvg.defs = self.defs + other.defs
+        newSvg.objects = ['<g>']+self.objects + \
+            ['</g>', '<g>'] + other.objects+['</g>']
+
+        return newSvg
