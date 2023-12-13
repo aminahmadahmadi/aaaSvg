@@ -1,4 +1,5 @@
 ﻿from math import sin, cos, radians
+from random import choice
 
 
 class Svg:
@@ -8,13 +9,19 @@ class Svg:
         self.name = name
         self.width = w
         self.height = h
+        self.addP()
         self.styles = []
         self.defs = []
         self.objects = []
         Svg.count += 1
 
+    def addP(self, n=5):
+        self.stylePrefix = ''
+        for _ in range(n):
+            self.stylePrefix += choice('abcdefghijklmnopqrstuvwxyz')
+
     def addStyle(self, className, css):
-        self.styles.append(f'.{className} {{{css}}}')
+        self.styles.append(f'.{self.stylePrefix}-{className} {{{css}}}')
 
     def addDefs(self, text):
         self.defs.append(text)
@@ -23,7 +30,7 @@ class Svg:
         self.objects.append(objText)
 
     def openGroup(self, **attrs):
-        self.addObjectText(f'<g  {Svg.manageAttrs(attrs)}>')
+        self.addObjectText(f'<g  {self.manageAttrs(attrs)}>')
 
     def closeGroup(self):
         self.addObjectText('</g>')
@@ -48,7 +55,7 @@ class Svg:
 
         self.svg = [
             '<?xml version="1.0" encoding="utf-8"?>',
-            f'<svg {Svg.manageAttrs(saveattrs)} xml:space="preserve" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">',
+            f'<svg {self.manageAttrs(saveattrs)} xml:space="preserve" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">',
             '<defs>',
             '' if len(
                 self.styles) == 0 else f'<style type="text/css" >\n{allStyles}\n</style>',
@@ -72,13 +79,19 @@ class Svg:
                 break
         return attrs
 
-    def manageAttrs(attrs):
+    def addPrefix(self, t):
+        tl = t.split()
+        tl2 = [self.stylePrefix+'-'+w for w in tl]
+
+        return ' '.join(tl2)
+
+    def manageAttrs(self, attrs):
         attrs = Svg.clearAttrs(attrs)
 
         _attrs = ''
         for key in attrs.keys():
             if key == 'class_':
-                _attrs += f'class="{attrs[key]}" '
+                _attrs += f'class="{self.addPrefix(attrs[key])}" '
             else:
                 _attrs += f'{key}="{attrs[key]}" '
         return _attrs
@@ -101,37 +114,37 @@ class Svg:
         self.addObjectText(f'<!-- {comment} -->')
 
     def addText(self, x, y, Text, **attrs):
-        textStr = f'<text x="{x}" y="{y}" {Svg.manageAttrs(attrs)}>{Text}</text>'
+        textStr = f'<text x="{x}" y="{y}" {self.manageAttrs(attrs)}>{Text}</text>'
         self.addObjectText(textStr)
 
     def addCircle(self, cx, cy, r, **attrs):
-        circleStr = f'<circle cx="{cx}" cy="{cy}" r="{r}" {Svg.manageAttrs(attrs)}/>'
+        circleStr = f'<circle cx="{cx}" cy="{cy}" r="{r}" {self.manageAttrs(attrs)}/>'
         self.addObjectText(circleStr)
 
     def addRect(self, x, y, w, h, **attrs):
-        rectStr = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" {Svg.manageAttrs(attrs)}/>'
+        rectStr = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" {self.manageAttrs(attrs)}/>'
         self.addObjectText(rectStr)
 
     def addEllipse(self, cx, cy, rx, ry, **attrs):
-        ellipseStr = f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}" {Svg.manageAttrs(attrs)}/>'
+        ellipseStr = f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}" {self.manageAttrs(attrs)}/>'
         self.addObjectText(ellipseStr)
 
     def addLine(self, x1, y1, x2, y2, **attrs):
-        lineStr = f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" {Svg.manageAttrs(attrs)}/>'
+        lineStr = f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" {self.manageAttrs(attrs)}/>'
         self.addObjectText(lineStr)
 
     def addPolygon(self, points, **attrs):
         points = Svg.removeDuplicate(points)
-        polygonStr = f'<polygon points="{Svg.managePoints(points)}" {Svg.manageAttrs(attrs)}/>'
+        polygonStr = f'<polygon points="{Svg.managePoints(points)}" {self.manageAttrs(attrs)}/>'
         self.addObjectText(polygonStr)
 
     def addPolyline(self, points, **attrs):
         points = Svg.removeDuplicate(points)
-        polylineStr = f'<polyline points="{Svg.managePoints(points)}" {Svg.manageAttrs(attrs)}/>'
+        polylineStr = f'<polyline points="{Svg.managePoints(points)}" {self.manageAttrs(attrs)}/>'
         self.addObjectText(polylineStr)
 
     def addPathByD(self, d, **attrs):
-        arcStr = f'<path d="{d}" {Svg.manageAttrs(attrs)}/>'
+        arcStr = f'<path d="{d}" {self.manageAttrs(attrs)}/>'
         self.addObjectText(arcStr)
 
     def addNormalArc(self, cx, cy, rx, ry, startDegree, endDegree, **attrs):
@@ -141,11 +154,11 @@ class Svg:
                 cy - ry * sin(radians(endDegree)))
         sweepFlag = 0 if endDegree > startDegree else 1
         largeArcFlag = 0 if endDegree - startDegree < 180 else 1
-        arcStr = f'<path d="M {_start[0]},{_start[1]} A {rx},{ry} 0 {largeArcFlag} {sweepFlag} {_end[0]},{_end[1]}" {Svg.manageAttrs(attrs)}/>'
+        arcStr = f'<path d="M {_start[0]},{_start[1]} A {rx},{ry} 0 {largeArcFlag} {sweepFlag} {_end[0]},{_end[1]}" {self.manageAttrs(attrs)}/>'
         self.addObjectText(arcStr)
 
     def addArc(self, x1, y1, rx, ry, xAxisRotation, largeArcFlag, sweepFlag, x2, y2, **attrs):
-        arcStr = f'<path d="M {x1},{y1} A {rx},{ry} {xAxisRotation} {largeArcFlag} {sweepFlag} {x2},{y2}" {Svg.manageAttrs(attrs)}/>'
+        arcStr = f'<path d="M {x1},{y1} A {rx},{ry} {xAxisRotation} {largeArcFlag} {sweepFlag} {x2},{y2}" {self.manageAttrs(attrs)}/>'
         self.addObjectText(arcStr)
 
     def addBezier(self, points, *data, **attrs):
@@ -203,7 +216,7 @@ class Svg:
                     else:
                         bezierStr += f' {points[i][0]},{points[i][1]}'
 
-        bezierStr += f'" {Svg.manageAttrs(attrs)}/>'
+        bezierStr += f'" {self.manageAttrs(attrs)}/>'
         self.addObjectText(bezierStr)
 
     def addCurve(self, points, **attrs):
@@ -301,7 +314,7 @@ class Svg:
         newSvg.styles = self.styles + other.styles
         newSvg.defs = self.defs + other.defs
         newSvg.objects = ['<g>']+self.objects + \
-            ['</g>', f'<g  {Svg.manageAttrs(otherAttrs)}>'] + \
+            ['</g>', f'<g  {self.manageAttrs(otherAttrs)}>'] + \
             other.objects+['</g>']
 
         return newSvg
