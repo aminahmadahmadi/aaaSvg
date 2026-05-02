@@ -50,8 +50,8 @@ class Svg:
         for key in attrs:
             saveattrs[key] = attrs[key]
 
-        allStyles = "\n".join(self.styles)
-        allDefs = "\n".join(self.defs)
+        allStyles = "\n".join(list(set(self.styles)))
+        allDefs = "\n".join(list(set(self.defs)))
 
         self.svg = [
             '<?xml version="1.0" encoding="utf-8"?>',
@@ -114,7 +114,10 @@ class Svg:
         self.addObjectText(f'<!-- {comment} -->')
 
     def addText(self, x, y, Text, **attrs):
-        textStr = f'<text x="{x}" y="{y}" {self.manageAttrs(attrs)}>{Text}</text>'
+        if Text == '' or Text == None:
+            return
+        attrs['style'] = 'white-space-collapse:preserve;' + attrs.get('style', '')  # noqa
+        textStr = f'<text x="{x}" y="{y}" {self.manageAttrs(attrs)} >{Text}</text>'
         self.addObjectText(textStr)
 
     def addCircle(self, cx, cy, r, **attrs):
