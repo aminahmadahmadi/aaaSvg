@@ -59,7 +59,7 @@ class Svg:
             '<defs>',
             '' if len(
                 self.styles) == 0 else f'<style type="text/css" >\n{allStyles}\n</style>',
-            '' if len(self.styles) == 0 else allDefs,
+            allDefs,
             '</defs>',
             '\n'.join(self.objects),
             '</svg>',
