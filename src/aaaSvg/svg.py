@@ -2,6 +2,7 @@
 from random import choice
 import lxml.etree as et
 from copy import deepcopy
+import os
 
 
 class Svg:
@@ -634,20 +635,31 @@ class Svg2:
                     self.addRect(x+i*_w, y+j*_w, _w, _w, **attrs)
         self.closeGroup()
 
-    def _preSave(self):
+    def _preSave(self, **kwargs):
         styleText = ''
         for style in self.styles:
             styleText += style.text
 
         self._style.text = styleText
 
+        for k, v in kwargs.items():
+            self.svgObj.set(k, v)
+
+    def _postSave(self, **kwargs):
+        for k in list(kwargs.keys()):
+            del self.svgObj.attrib[k]
+
     def tostring(self):
         return et.tostring(self.svgObj, pretty_print=True, xml_declaration=True).decode()
 
-    def save(self):
-        self._preSave()
-        with open(f'{self.name}.svg', 'w') as f:
+    def save(self, direction='', **kwargs):
+        self._preSave(**kwargs)
+        name = os.path.join(direction, f'{self.name}.svg')
+
+        with open(f'{name}.svg', 'w', encoding="utf-8") as f:
             f.write(self.tostring())
+
+        self._postSave(**kwargs)
 
     def concat(self, other, direction='row'):
         if direction in ['row']:
