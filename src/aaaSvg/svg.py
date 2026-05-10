@@ -282,6 +282,34 @@ class Svg:
 
         self.addCurve(points, _attrs=attrs)
 
+    def addQR(self, data, x=0, y=0, w=100, border=0, bgColor='none', **attrs):
+        try:
+            import qrcode
+        except:
+            raise ImportError(
+                '\033[93mWARNING:  qrcode is not installed.\033[0m Install with "pip install qrcode"')
+
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            border=border,
+        )
+
+        qr.add_data(data)
+        qr.make(fit=True)
+
+        matrix = qr.get_matrix()
+        n = len(matrix)
+        _w = w/n
+
+        self.openGroup()
+        self.addRect(x, y, w, w, fill=bgColor)
+        for j, line in enumerate(matrix):
+            for i, cell in enumerate(line):
+                if cell:
+                    self.addRect(x+i*_w, y+j*_w, _w, _w, **attrs)
+        self.closeGroup()
+
     def progressbar(name, Min, no, Max, m=50):
         Min = int(Min)
         Max = int(Max)
