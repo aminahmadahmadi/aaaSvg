@@ -379,6 +379,8 @@ class Style():
         return self.text
 
     def fixName(styleName, prefix):
+        if styleName[0] not in '.#':
+            styleName = f'.{styleName}'
         if prefix is not None:
             styleName = styleName.replace('.', f'.{prefix}')
             styleName = styleName.replace('#', f'#{prefix}')
@@ -546,6 +548,26 @@ class Svg2:
         self._currentParent = self._currentParent.getparent()
         return self._currentParent
 
+    def addFilter(self, Id,  **kwargs):
+        return self.addObj('filter', Id=Id, parent=self.defs, **kwargs)
+
+    def addFeImage(self, filter, x, y, w, h, href, result, **kwargs):
+        return self.addObj(
+            'feImage',
+            parent=filter,
+            x=x, y=y, width=w, height=h,
+            href=href, result=result,
+            **kwargs
+        )
+
+    def addFeBlend(self, filter, In, In2, mode, **kwargs):
+        return self.addObj(
+            'feBlend',
+            parent=filter,
+            In=In, In2=In2, mode=mode,
+            **kwargs
+        )
+
     def addLinearGradient(self, Id, **kwargs):
         return self.addObj('linearGradient', Id=Id, parent=self.defs, **kwargs)
 
@@ -641,7 +663,7 @@ class Svg2:
     def _preSave(self, **kwargs):
         styleText = ''
         for style in self.styles:
-            styleText += style.text
+            styleText += style.text+'\n'
 
         self._style.text = styleText
 
@@ -652,20 +674,21 @@ class Svg2:
         for k in list(kwargs.keys()):
             del self.svgObj.attrib[k]
 
-    def tostring(self):
-        return et.tostring(self.svgObj, pretty_print=True, xml_declaration=True).decode()
+    def tostring(self, **kwargs):
+        self._preSave(**kwargs)
+        string = et.tostring(self.svgObj, pretty_print=True,
+                             xml_declaration=True, encoding='utf-8').decode('utf-8')
+        self._postSave(**kwargs)
+        return string
 
-    def text(self):
-        return self.tostring()
+    def text(self, **kwargs):
+        return self.tostring(**kwargs)
 
     def save(self, direction='', **kwargs):
-        self._preSave(**kwargs)
         name = os.path.join(direction, f'{self.name}.svg')
 
-        with open(f'{name}.svg', 'w', encoding="utf-8") as f:
-            f.write(self.tostring())
-
-        self._postSave(**kwargs)
+        with open(name, 'w', encoding="utf-8") as f:
+            f.write(self.tostring(**kwargs))
 
     def concat(self, other, direction='row'):
         if direction in ['row']:
