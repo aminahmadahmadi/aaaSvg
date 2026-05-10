@@ -623,7 +623,6 @@ class Svg2:
             styleText += style.text
 
         self._style.text = styleText
-        print(self._style)
 
     def tostring(self):
         return et.tostring(self.svgObj, pretty_print=True, xml_declaration=True).decode()
@@ -663,7 +662,6 @@ class Svg2:
         newSvg = Svg2(f'add {self.name} and {other.name}', w, h)
 
         for svg in [self, other]:
-            print(svg.tostring())
             g = newSvg.openGroup(name=svg.name)
             for e in svg.svgObj:
                 g.append(deepcopy(e))
