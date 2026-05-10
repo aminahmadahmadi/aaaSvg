@@ -392,9 +392,12 @@ class Style():
             self.prefix
         )
 
-        _styleText = ''
-        for k, v in self.styleObj.items():
-            _styleText += f'{k}: {v};'
+        if type(self.styleObj) == dict:
+            _styleText = ''
+            for k, v in self.styleObj.items():
+                _styleText += f'{k}: {v};'
+        elif type(self.styleObj) == str:
+            _styleText = self.styleObj
 
         return f'{_styleName} {{ {_styleText} }}'
 
@@ -651,6 +654,9 @@ class Svg2:
 
     def tostring(self):
         return et.tostring(self.svgObj, pretty_print=True, xml_declaration=True).decode()
+
+    def text(self):
+        return self.tostring()
 
     def save(self, direction='', **kwargs):
         self._preSave(**kwargs)
