@@ -1,5 +1,7 @@
 ﻿from math import sin, cos, radians
 from random import choice
+import lxml.etree as et
+from copy import deepcopy
 
 
 class Svg:
@@ -328,7 +330,7 @@ class Svg:
             print(f'> {name} Done!{(m+50)*" "}')
 
     def concat(self, other, direction=0):
-        ''' 
+        '''
         direction 0 -> horizontal
         direction 1 -> vertical
         '''
@@ -361,3 +363,340 @@ class Svg:
             ['</g>', '<g>'] + other.objects+['</g>']
 
         return newSvg
+
+
+class Style():
+    def __init__(self, styleName: str, styleObj: dict, prefix=None):
+        self.styleName = styleName
+        self.prefix = prefix
+        self.styleObj = styleObj
+
+    def __repr__(self):
+        return f"<style  {self.styleName}  >"
+
+    def __str__(self):
+        return self.text
+
+    def fixName(styleName, prefix):
+        if prefix is not None:
+            styleName = styleName.replace('.', f'.{prefix}')
+            styleName = styleName.replace('#', f'#{prefix}')
+
+        return styleName
+
+    @property
+    def text(self):
+        _styleName = Style.fixName(
+            self.styleName,
+            self.prefix
+        )
+
+        _styleText = ''
+        for k, v in self.styleObj.items():
+            _styleText += f'{k}: {v};'
+
+        return f'{_styleName} {{ {_styleText} }}'
+
+
+class Svg2:
+    count = 0
+
+    def __init__(self, name='unNamedSvg', w=100, h=100):
+        self.name = name
+        self.width = w
+        self.height = h
+
+        self.svgObj = et.Element(
+            "svg",
+            **{
+                "viewBox": f"0 0 {self.width} {self.height}",
+
+                # Other attributes
+                "version": "1.1",
+                "xmlns": "http://www.w3.org/2000/svg",
+            }
+        )
+        self._generatePrefix()
+
+        self.defs = et.SubElement(self.svgObj, "defs")
+        self._style = et.SubElement(self.defs, "style")
+        self.styles = []
+
+        self._currentParent = self.svgObj
+
+        Svg.count += 1
+
+    def fixAttrs(self, attrs: dict[str:str]):
+        for k in attrs.keys():
+            if k.lower() in ['_class', 'class_', 'class']:
+                Class = attrs.pop(k)
+                Classes = Class.split(' ')
+                _classes = []
+                for _c in Classes:
+                    _classes.append(f'{self.stylePrefix}{_c}')
+
+                Class = ' '.join(_classes)
+
+                attrs['class'] = Class
+                break
+
+        key_list = list(attrs.keys())
+        for k in key_list:
+            v = attrs.pop(k)
+
+            if '_' in k:
+                k = k.replace('_', '-')
+
+            if type(v) in [int, float]:
+                v = f'{v}'
+
+            attrs[k] = v
+
+        return attrs
+
+    def _generatePrefix(self, n: int = 5) -> str:
+        prefix = ''
+        for _ in range(n):
+            prefix += choice('abcdefghijklmnopqrstuvwxyz')
+        self.stylePrefix = f'{prefix}-'
+
+        return prefix
+
+    def changePrefix(self, prefix: str | int | None) -> None:
+        if prefix is not None:
+            prefix = f'{prefix}-'
+
+        self.stylePrefix = prefix
+        for style in self.styles:
+            style.prefix = prefix
+
+    def addStyle(self, styleName: str, styleObj: dict = {}) -> Style:
+        style = Style(
+            styleName=styleName,
+            styleObj=styleObj,
+            prefix=self.stylePrefix,
+        )
+        self.styles.append(style)
+
+        return style
+
+    @staticmethod
+    def _removeDuplicate(points):
+        newPoints = [points[0]]
+        for i in range(1, len(points)):
+            if newPoints[-1] != points[i]:
+                newPoints.append(points[i])
+
+        return newPoints
+
+    @staticmethod
+    def _managePoints(points):
+        points = Svg2._removeDuplicate(points)
+        _points = ''
+        for point in points:
+            _points += f'{point[0]},{point[1]} '
+        return _points
+
+    @staticmethod
+    def prepare_func(func):
+        def wrapper(self, *args, **kwargs):
+            kwargs = self.fixAttrs(kwargs)
+            kwargs['parent'] = kwargs.get('parent', self._currentParent)
+
+            return func(self, *args, **kwargs)
+        return wrapper
+
+    def addComment(self, text=""):
+        self._currentParent.append(
+            et.Comment(text)
+        )
+
+    @prepare_func
+    def addObj(self, objName: str, **kwargs):
+        Obj = et.SubElement(
+            kwargs.pop('parent'),
+            objName,
+            **kwargs
+        )
+        return Obj
+
+    def addGroup(self, **kwargs):
+        return self.addObj('g', **kwargs)
+
+    def openGroup(self, **kwargs):
+        self._currentParent = self.addObj('g', **kwargs)
+        return self._currentParent
+
+    def closeGroup(self):
+        self._currentParent = self._currentParent.getparent()
+        return self._currentParent
+
+    def addText(self, x, y, text, **kwargs):
+        if text == '' or text == None:
+            return
+
+        kwargs['style'] = 'white-space-collapse:preserve;' + kwargs.get('style', '')  # noqa
+
+        textObj = self.addObj('text', x=x, y=y, **kwargs)
+        textObj.text = text
+        return textObj
+
+    def addCircle(self, cx, cy, r, **kwargs):
+        return self.addObj('circle', cx=cx, cy=cy, r=r, **kwargs)
+
+    def addRect(self, x, y, w, h, **kwargs):
+        return self.addObj('rect', x=x, y=y, width=w, height=h, **kwargs)
+
+    def addEllipse(self, cx, cy, rx, ry, **kwargs):
+        return self.addObj('ellipse', cx=cx, cy=cy, rx=rx, ry=ry, **kwargs)
+
+    def addLine(self, x1, y1, x2, y2, **kwargs):
+        return self.addObj('line', x1=x1, y1=y1, x2=x2, y2=y2, **kwargs)
+
+    def addPolygon(self, points, **kwargs):
+        return self.addObj('polygon', points=Svg2._managePoints(points=points), **kwargs)
+
+    def addPolyline(self, points, **kwargs):
+        return self.addObj('polyline', points=Svg2._managePoints(points=points), **kwargs)
+
+    def addPathByD(self, d, **kwargs):
+        print('"addPathByD()" is the old version please use "addPath()"')
+        return self.addObj('path', d=d, **kwargs)
+
+    def addPath(self, d, **kwargs):
+        return self.addObj('path', d=d, **kwargs)
+
+    def addArc(self, x1, y1, rx, ry, xAxisRotation, largeArcFlag, sweepFlag, x2, y2, **kwargs):
+        return self.addPath(d=f"M {x1},{y1} A {rx},{ry} {xAxisRotation} {largeArcFlag} {sweepFlag} {x2},{y2}", **kwargs)
+
+    def addNormalArc(self, cx, cy, rx, ry, startDegree, endDegree, **kwargs):
+        x1 = cx + rx * cos(radians(startDegree))
+        y1 = cy - ry * sin(radians(startDegree))
+
+        x2 = cx + rx * cos(radians(endDegree))
+        y2 = cy - ry * sin(radians(endDegree))
+
+        sweepFlag = 0 if endDegree > startDegree else 1
+        largeArcFlag = 0 if endDegree - startDegree < 180 else 1
+
+        return self.addArc(
+            x1=x1, y1=y1,
+            rx=rx, ry=ry,
+            xAxisRotation=0,
+            largeArcFlag=largeArcFlag,
+            sweepFlag=sweepFlag,
+            x2=x2, y2=y2,
+            **kwargs
+        )
+
+    def addQR(self, data, x=0, y=0, w=100, border=0, bgColor='none', **attrs):
+        try:
+            import qrcode
+        except:
+            raise ImportError(
+                '\033[93mWARNING:  qrcode is not installed.\033[0m Install with "pip install qrcode"')
+
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            border=border,
+        )
+
+        qr.add_data(data)
+        qr.make(fit=True)
+
+        matrix = qr.get_matrix()
+        n = len(matrix)
+        _w = w/n
+
+        self.openGroup()
+        self.addRect(x, y, w, w, fill=bgColor)
+        for j, line in enumerate(matrix):
+            for i, cell in enumerate(line):
+                if cell:
+                    self.addRect(x+i*_w, y+j*_w, _w, _w, **attrs)
+        self.closeGroup()
+
+    def _preSave(self):
+        styleText = ''
+        for style in self.styles:
+            styleText += style.text
+
+        self._style.text = styleText
+        print(self._style)
+
+    def tostring(self):
+        return et.tostring(self.svgObj, pretty_print=True, xml_declaration=True).decode()
+
+    def save(self):
+        self._preSave()
+        with open(f'{self.name}.svg', 'w') as f:
+            f.write(self.tostring())
+
+    def concat(self, other, direction='row'):
+        if direction in ['row']:
+            w = self.width + other.width
+            h = max(self.height, other.height)
+            dx = self.width
+            dy = 0
+        elif direction in ['column', 'col']:
+            w = max(self.width, other.width)
+            h = self.height + other.height
+            dx = 0
+            dy = self.height
+
+        newSvg = Svg2(f'concat {direction} {self.name} and {other.name}', w, h)
+
+        for svg in [self, other]:
+            g = newSvg.openGroup(
+                name=svg.name,
+                transform=f"translate( {dx}, {dy} )" if svg == other else ""
+            )
+            for e in svg.svgObj:
+                g.append(deepcopy(e))
+            newSvg.closeGroup()
+
+        return newSvg
+
+    def __add__(self, other: 'Svg2') -> 'Svg2':
+        w, h = max(self.width, other.width), max(self.height, other.height)
+        newSvg = Svg2(f'add {self.name} and {other.name}', w, h)
+
+        for svg in [self, other]:
+            print(svg.tostring())
+            g = newSvg.openGroup(name=svg.name)
+            for e in svg.svgObj:
+                g.append(deepcopy(e))
+            newSvg.closeGroup()
+
+        return newSvg
+
+
+if __name__ == "__main__":
+    svg_1 = Svg2('svg1')
+    svg_1.addStyle('.fill', {"fill": "red"})
+    svg_1.addRect(0, 0, 100, 100, fill="yellow", opacity=0.25)
+    svg_1.addCircle(50, 50, 30, Class='fill')
+    svg_1.save()
+
+    svg_2 = Svg2('svg2', 50, 200)
+    svg_2.addStyle('.fill', {"fill": "blue"})
+    svg_2.addRect(0, 0, 50, 200, fill="white", opacity=0.25)
+    svg_2.addRect(20, 20, 10, 160)
+    svg_2.addCircle(20, 100, 10, Class='fill')
+    svg_2.save()
+
+    svg_3 = svg_1 + svg_2
+    svg_3.save()
+    svg_4 = svg_2 + svg_1
+    svg_4.save()
+
+    svg_5 = svg_1.concat(svg_2, "row")
+    svg_5.save()
+    svg_6 = svg_2.concat(svg_1, "row")
+    svg_6.save()
+
+    svg_7 = svg_1.concat(svg_2, "col")
+    svg_7.save()
+    svg_8 = svg_2.concat(svg_1, "col")
+    svg_8.save()
