@@ -524,12 +524,29 @@ class Svg2:
         return self.addObj('g', **kwargs)
 
     def openGroup(self, **kwargs):
-        self._currentParent = self.addObj('g', **kwargs)
+        self._currentParent = self.addGroup(**kwargs)
         return self._currentParent
 
     def closeGroup(self):
         self._currentParent = self._currentParent.getparent()
         return self._currentParent
+
+    def addMask(self, Id, mask_type="luminance", **kwargs):
+        return self.addObj('mask', Id=Id, mask_type=mask_type, ** kwargs)
+
+    def openMask(self, Id, mask_type="luminance", **kwargs):
+        self._currentParent = self.addMask(Id=Id, mask_type=mask_type, **kwargs)  # noqa
+        return self._currentParent
+
+    def closeMask(self):
+        self._currentParent = self._currentParent.getparent()
+        return self._currentParent
+
+    def addLinearGradient(self, Id, **kwargs):
+        return self.addObj('linearGradient', Id=Id, parent=self.defs, **kwargs)
+
+    def addGradientStop(self, gradient, offset, stop_color, stop_opacity=1, **kwargs):
+        return self.addObj('stop', offset=offset, stop_color=stop_color, stop_opacity=stop_opacity, parent=gradient, **kwargs)
 
     def addText(self, x, y, text, **kwargs):
         if text == '' or text == None:
