@@ -407,7 +407,7 @@ class Style():
 class Svg2:
     count = 0
 
-    def __init__(self, name='unNamedSvg', w=100, h=100):
+    def __init__(self, name='unNamedSvg', w=100, h=100, **kwargs):
         self.name = name
         self.width = w
         self.height = h
@@ -420,7 +420,8 @@ class Svg2:
                 # Other attributes
                 "version": "1.1",
                 "xmlns": "http://www.w3.org/2000/svg",
-            }
+            },
+            **kwargs,
         )
         self._generatePrefix()
 
@@ -729,7 +730,7 @@ class Svg2:
 
 
 if __name__ == "__main__":
-    svg_1 = Svg2('svg1')
+    svg_1 = Svg2('svg1', width='12mm')
     svg_1.addStyle('.fill', {"fill": "red"})
     svg_1.addRect(0, 0, 100, 100, fill="yellow", opacity=0.25)
     svg_1.addCircle(50, 50, 30, Class='fill')
@@ -748,7 +749,7 @@ if __name__ == "__main__":
     svg_4.save()
 
     svg_5 = svg_1.concat(svg_2, "row")
-    svg_5.save()
+    svg_5.save(height="20mm")
     svg_6 = svg_2.concat(svg_1, "row")
     svg_6.save()
 

@@ -1,3 +1,6 @@
+# local
+*.svg
+
 # vscode
 .vscode/
 
