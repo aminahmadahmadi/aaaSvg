@@ -456,6 +456,8 @@ class Svg2:
 
             if type(v) in [int, float]:
                 v = f'{v}'
+            elif v is None:
+                v = 'none'
 
             attrs[k] = v
 
@@ -582,7 +584,7 @@ class Svg2:
         kwargs['style'] = 'white-space-collapse:preserve;' + kwargs.get('style', '')  # noqa
 
         textObj = self.addObj('text', x=x, y=y, **kwargs)
-        textObj.text = text
+        textObj.text = str(text)
         return textObj
 
     def addCircle(self, cx, cy, r, **kwargs):
