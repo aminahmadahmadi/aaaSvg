@@ -479,10 +479,13 @@ class Svg2:
         for style in self.styles:
             style.prefix = prefix
 
-    def addStyle(self, styleName: str, styleObj: dict = {}) -> Style:
+    def addStyle(self, styleName: str, styleObj: dict = {}, **kwargs) -> Style:
+        styleObj.update(kwargs)
+        _styleObj = self.fixAttrs(styleObj)
+
         style = Style(
             styleName=styleName,
-            styleObj=styleObj,
+            styleObj=_styleObj,
             prefix=self.stylePrefix,
         )
         self.styles.append(style)
